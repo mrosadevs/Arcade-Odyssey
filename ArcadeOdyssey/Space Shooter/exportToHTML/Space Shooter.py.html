@@ -1,0 +1,190 @@
+<html>
+<head>
+<title>Space Shooter.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cf8e6d;}
+.s1 { color: #bcbec4;}
+.s2 { color: #7a7e85;}
+.s3 { color: #bcbec4;}
+.s4 { color: #6aab73;}
+.s5 { color: #2aacb8;}
+</style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+Space Shooter.py</font>
+</center></td></tr></table>
+<pre><span class="s0">import </span><span class="s1">random</span>
+<span class="s0">import </span><span class="s1">pygame</span>
+<span class="s0">import </span><span class="s1">math</span>
+<span class="s0">import </span><span class="s1">time</span>
+<span class="s0">from </span><span class="s1">pygame </span><span class="s0">import </span><span class="s1">mixer</span>
+
+<span class="s2"># Initialize Pygame</span>
+<span class="s1">pygame</span><span class="s3">.</span><span class="s1">init</span><span class="s3">()</span>
+<span class="s1">mixer</span><span class="s3">.</span><span class="s1">init</span><span class="s3">()</span>
+
+<span class="s2"># Load sound effects</span>
+<span class="s1">laser_sound </span><span class="s3">= </span><span class="s1">mixer</span><span class="s3">.</span><span class="s1">Sound</span><span class="s3">(</span><span class="s4">'Laser.Shot.mp3'</span><span class="s3">)</span>
+<span class="s1">explosion_sound </span><span class="s3">= </span><span class="s1">mixer</span><span class="s3">.</span><span class="s1">Sound</span><span class="s3">(</span><span class="s4">'Ship.Explosion.mp3'</span><span class="s3">)</span>
+
+<span class="s2"># Screen setup</span>
+<span class="s1">screen </span><span class="s3">= </span><span class="s1">pygame</span><span class="s3">.</span><span class="s1">display</span><span class="s3">.</span><span class="s1">set_mode</span><span class="s3">((</span><span class="s5">900</span><span class="s3">, </span><span class="s5">700</span><span class="s3">))</span>
+<span class="s1">pygame</span><span class="s3">.</span><span class="s1">display</span><span class="s3">.</span><span class="s1">set_caption</span><span class="s3">(</span><span class="s4">'Space Warrior'</span><span class="s3">)</span>
+<span class="s1">icon </span><span class="s3">= </span><span class="s1">pygame</span><span class="s3">.</span><span class="s1">image</span><span class="s3">.</span><span class="s1">load</span><span class="s3">(</span><span class="s4">'icon.png'</span><span class="s3">)</span>
+<span class="s1">pygame</span><span class="s3">.</span><span class="s1">display</span><span class="s3">.</span><span class="s1">set_icon</span><span class="s3">(</span><span class="s1">icon</span><span class="s3">)</span>
+
+<span class="s1">enemy_img </span><span class="s3">= []</span>
+<span class="s1">enemyX </span><span class="s3">= []</span>
+<span class="s1">enemyY </span><span class="s3">= []</span>
+<span class="s1">enemy_SpeedX </span><span class="s3">= []</span>
+<span class="s1">enemy_SpeedY </span><span class="s3">= []</span>
+
+<span class="s2"># Increased the number of enemies</span>
+<span class="s1">no_of_enemies </span><span class="s3">= </span><span class="s5">10</span>
+
+<span class="s2"># Initialize enemy attributes</span>
+<span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">range</span><span class="s3">(</span><span class="s1">no_of_enemies</span><span class="s3">):</span>
+    <span class="s1">enemy_img</span><span class="s3">.</span><span class="s1">append</span><span class="s3">(</span><span class="s1">pygame</span><span class="s3">.</span><span class="s1">image</span><span class="s3">.</span><span class="s1">load</span><span class="s3">(</span><span class="s4">'Enemyship.png'</span><span class="s3">))</span>
+    <span class="s1">enemyX</span><span class="s3">.</span><span class="s1">append</span><span class="s3">(</span><span class="s1">random</span><span class="s3">.</span><span class="s1">randint</span><span class="s3">(</span><span class="s5">0</span><span class="s3">, </span><span class="s5">900 </span><span class="s3">- </span><span class="s5">64</span><span class="s3">))  </span><span class="s2"># Adjust for enemy width</span>
+    <span class="s1">enemyY</span><span class="s3">.</span><span class="s1">append</span><span class="s3">(</span><span class="s1">random</span><span class="s3">.</span><span class="s1">randint</span><span class="s3">(</span><span class="s5">30</span><span class="s3">, </span><span class="s5">150</span><span class="s3">))     </span><span class="s2"># Random Y position for variety</span>
+    <span class="s1">enemy_SpeedX</span><span class="s3">.</span><span class="s1">append</span><span class="s3">(</span><span class="s5">0.5</span><span class="s3">)</span>
+    <span class="s1">enemy_SpeedY</span><span class="s3">.</span><span class="s1">append</span><span class="s3">(</span><span class="s5">30</span><span class="s3">)</span>
+
+<span class="s2"># Background and player setup</span>
+<span class="s1">background </span><span class="s3">= </span><span class="s1">pygame</span><span class="s3">.</span><span class="s1">image</span><span class="s3">.</span><span class="s1">load</span><span class="s3">(</span><span class="s4">'Space.Background.jpg'</span><span class="s3">)</span>
+<span class="s1">player_img </span><span class="s3">= </span><span class="s1">pygame</span><span class="s3">.</span><span class="s1">image</span><span class="s3">.</span><span class="s1">load</span><span class="s3">(</span><span class="s4">'spaceship1.png'</span><span class="s3">)</span>
+<span class="s1">bullet_img </span><span class="s3">= </span><span class="s1">pygame</span><span class="s3">.</span><span class="s1">image</span><span class="s3">.</span><span class="s1">load</span><span class="s3">(</span><span class="s4">'bullet.png'</span><span class="s3">)</span>
+<span class="s1">bullet_state </span><span class="s3">= </span><span class="s4">&quot;ready&quot;  </span><span class="s2"># Indicates if the bullet is ready to fire</span>
+
+<span class="s2"># Initial player position and movement variables</span>
+<span class="s1">playerX </span><span class="s3">= </span><span class="s5">400</span>
+<span class="s1">playerY </span><span class="s3">= </span><span class="s5">560</span>
+<span class="s1">changeX </span><span class="s3">= </span><span class="s5">0</span>
+
+<span class="s2"># Score and font setup</span>
+<span class="s1">score </span><span class="s3">= </span><span class="s5">0</span>
+<span class="s1">font </span><span class="s3">= </span><span class="s1">pygame</span><span class="s3">.</span><span class="s1">font</span><span class="s3">.</span><span class="s1">SysFont</span><span class="s3">(</span><span class="s4">'Arial'</span><span class="s3">, </span><span class="s5">32</span><span class="s3">, </span><span class="s0">True</span><span class="s3">)</span>
+
+<span class="s0">def </span><span class="s1">score_text</span><span class="s3">():</span>
+    <span class="s1">img </span><span class="s3">= </span><span class="s1">font</span><span class="s3">.</span><span class="s1">render</span><span class="s3">(</span><span class="s4">f'Score: </span><span class="s0">{</span><span class="s1">score</span><span class="s0">}</span><span class="s4">'</span><span class="s3">, </span><span class="s0">True</span><span class="s3">, </span><span class="s4">'white'</span><span class="s3">)</span>
+    <span class="s1">screen</span><span class="s3">.</span><span class="s1">blit</span><span class="s3">(</span><span class="s1">img</span><span class="s3">, (</span><span class="s5">10</span><span class="s3">, </span><span class="s5">10</span><span class="s3">))</span>
+
+<span class="s1">font_gameover </span><span class="s3">= </span><span class="s1">pygame</span><span class="s3">.</span><span class="s1">font</span><span class="s3">.</span><span class="s1">SysFont</span><span class="s3">(</span><span class="s4">'Arial'</span><span class="s3">, </span><span class="s5">50</span><span class="s3">, </span><span class="s0">True</span><span class="s3">)</span>
+
+<span class="s0">def </span><span class="s1">gameover_text</span><span class="s3">():</span>
+    <span class="s1">img_gameover </span><span class="s3">= </span><span class="s1">font_gameover</span><span class="s3">.</span><span class="s1">render</span><span class="s3">(</span><span class="s4">'GAME OVER'</span><span class="s3">, </span><span class="s0">True</span><span class="s3">, </span><span class="s4">'white'</span><span class="s3">)</span>
+    <span class="s1">screen</span><span class="s3">.</span><span class="s1">blit</span><span class="s3">(</span><span class="s1">img_gameover</span><span class="s3">, (</span><span class="s5">300</span><span class="s3">, </span><span class="s5">250</span><span class="s3">))</span>
+
+<span class="s2"># Bullet position and speed</span>
+<span class="s1">bulletX </span><span class="s3">= </span><span class="s5">0</span>
+<span class="s1">bulletY </span><span class="s3">= </span><span class="s1">playerY</span>
+<span class="s1">bullet_speedY </span><span class="s3">= -</span><span class="s5">4</span>
+
+<span class="s2"># Firing rate control variables</span>
+<span class="s1">bullet_time </span><span class="s3">= </span><span class="s1">time</span><span class="s3">.</span><span class="s1">time</span><span class="s3">()  </span><span class="s2"># Store the current time when the player can fire again</span>
+<span class="s1">bullet_delay </span><span class="s3">= </span><span class="s5">0.1  </span><span class="s2"># Time interval between bullets in seconds (lower = faster)</span>
+
+<span class="s2"># Functions to draw objects</span>
+<span class="s0">def </span><span class="s1">player</span><span class="s3">(</span><span class="s1">x</span><span class="s3">, </span><span class="s1">y</span><span class="s3">):</span>
+    <span class="s1">screen</span><span class="s3">.</span><span class="s1">blit</span><span class="s3">(</span><span class="s1">player_img</span><span class="s3">, (</span><span class="s1">x</span><span class="s3">, </span><span class="s1">y</span><span class="s3">))</span>
+
+<span class="s0">def </span><span class="s1">enemy</span><span class="s3">(</span><span class="s1">x</span><span class="s3">, </span><span class="s1">y</span><span class="s3">, </span><span class="s1">i</span><span class="s3">):</span>
+    <span class="s1">screen</span><span class="s3">.</span><span class="s1">blit</span><span class="s3">(</span><span class="s1">enemy_img</span><span class="s3">[</span><span class="s1">i</span><span class="s3">], (</span><span class="s1">x</span><span class="s3">, </span><span class="s1">y</span><span class="s3">))</span>
+
+<span class="s0">def </span><span class="s1">fire_bullet</span><span class="s3">(</span><span class="s1">x</span><span class="s3">, </span><span class="s1">y</span><span class="s3">):</span>
+    <span class="s0">global </span><span class="s1">bullet_state</span>
+    <span class="s1">bullet_state </span><span class="s3">= </span><span class="s4">&quot;fired&quot;</span>
+    <span class="s1">screen</span><span class="s3">.</span><span class="s1">blit</span><span class="s3">(</span><span class="s1">bullet_img</span><span class="s3">, (</span><span class="s1">x </span><span class="s3">+ </span><span class="s5">16</span><span class="s3">, </span><span class="s1">y </span><span class="s3">+ </span><span class="s5">10</span><span class="s3">))  </span><span class="s2"># Center the bullet relative to the player</span>
+    <span class="s1">laser_sound</span><span class="s3">.</span><span class="s1">play</span><span class="s3">()  </span><span class="s2"># Play laser shot sound</span>
+
+<span class="s0">def </span><span class="s1">is_collision</span><span class="s3">(</span><span class="s1">bulletX</span><span class="s3">, </span><span class="s1">bulletY</span><span class="s3">, </span><span class="s1">enemyX</span><span class="s3">, </span><span class="s1">enemyY</span><span class="s3">):</span>
+    <span class="s2"># Calculate the distance between the bullet and the enemy</span>
+    <span class="s1">distance </span><span class="s3">= </span><span class="s1">math</span><span class="s3">.</span><span class="s1">sqrt</span><span class="s3">((</span><span class="s1">bulletX </span><span class="s3">- </span><span class="s1">enemyX</span><span class="s3">) ** </span><span class="s5">2 </span><span class="s3">+ (</span><span class="s1">bulletY </span><span class="s3">- </span><span class="s1">enemyY</span><span class="s3">) ** </span><span class="s5">2</span><span class="s3">)</span>
+    <span class="s0">return </span><span class="s1">distance </span><span class="s3">&lt; </span><span class="s5">27  </span><span class="s2"># Collision threshold</span>
+
+<span class="s2"># Main game loop</span>
+<span class="s1">running </span><span class="s3">= </span><span class="s0">True</span>
+<span class="s1">game_over </span><span class="s3">= </span><span class="s0">False  </span><span class="s2"># Variable to track if the game is over</span>
+
+<span class="s0">while </span><span class="s1">running</span><span class="s3">:</span>
+    <span class="s2"># Draw background</span>
+    <span class="s1">screen</span><span class="s3">.</span><span class="s1">blit</span><span class="s3">(</span><span class="s1">background</span><span class="s3">, (</span><span class="s5">0</span><span class="s3">, </span><span class="s5">0</span><span class="s3">))</span>
+
+    <span class="s2"># Event handling</span>
+    <span class="s0">for </span><span class="s1">event </span><span class="s0">in </span><span class="s1">pygame</span><span class="s3">.</span><span class="s1">event</span><span class="s3">.</span><span class="s1">get</span><span class="s3">():</span>
+        <span class="s0">if </span><span class="s1">event</span><span class="s3">.</span><span class="s1">type </span><span class="s3">== </span><span class="s1">pygame</span><span class="s3">.</span><span class="s1">QUIT</span><span class="s3">:</span>
+            <span class="s1">running </span><span class="s3">= </span><span class="s0">False</span>
+
+        <span class="s0">if not </span><span class="s1">game_over</span><span class="s3">:  </span><span class="s2"># Allow movement and firing only if the game is not over</span>
+            <span class="s0">if </span><span class="s1">event</span><span class="s3">.</span><span class="s1">type </span><span class="s3">== </span><span class="s1">pygame</span><span class="s3">.</span><span class="s1">KEYDOWN</span><span class="s3">:</span>
+                <span class="s0">if </span><span class="s1">event</span><span class="s3">.</span><span class="s1">key </span><span class="s3">== </span><span class="s1">pygame</span><span class="s3">.</span><span class="s1">K_LEFT</span><span class="s3">:</span>
+                    <span class="s1">changeX </span><span class="s3">= -</span><span class="s5">1  </span><span class="s2"># Adjust speed</span>
+                <span class="s0">if </span><span class="s1">event</span><span class="s3">.</span><span class="s1">key </span><span class="s3">== </span><span class="s1">pygame</span><span class="s3">.</span><span class="s1">K_RIGHT</span><span class="s3">:</span>
+                    <span class="s1">changeX </span><span class="s3">= </span><span class="s5">1</span>
+                <span class="s0">if </span><span class="s1">event</span><span class="s3">.</span><span class="s1">key </span><span class="s3">== </span><span class="s1">pygame</span><span class="s3">.</span><span class="s1">K_SPACE</span><span class="s3">:</span>
+                    <span class="s1">current_time </span><span class="s3">= </span><span class="s1">time</span><span class="s3">.</span><span class="s1">time</span><span class="s3">()</span>
+                    <span class="s0">if </span><span class="s1">bullet_state </span><span class="s3">== </span><span class="s4">&quot;ready&quot; </span><span class="s0">and </span><span class="s1">current_time </span><span class="s3">- </span><span class="s1">bullet_time </span><span class="s3">&gt; </span><span class="s1">bullet_delay</span><span class="s3">:</span>
+                        <span class="s1">bulletX </span><span class="s3">= </span><span class="s1">playerX  </span><span class="s2"># Set bullet's starting position to the player's current position</span>
+                        <span class="s1">fire_bullet</span><span class="s3">(</span><span class="s1">bulletX</span><span class="s3">, </span><span class="s1">bulletY</span><span class="s3">)</span>
+                        <span class="s1">bullet_time </span><span class="s3">= </span><span class="s1">current_time  </span><span class="s2"># Update the last time a bullet was fired</span>
+
+            <span class="s0">if </span><span class="s1">event</span><span class="s3">.</span><span class="s1">type </span><span class="s3">== </span><span class="s1">pygame</span><span class="s3">.</span><span class="s1">KEYUP</span><span class="s3">:</span>
+                <span class="s0">if </span><span class="s1">event</span><span class="s3">.</span><span class="s1">key </span><span class="s3">== </span><span class="s1">pygame</span><span class="s3">.</span><span class="s1">K_LEFT </span><span class="s0">or </span><span class="s1">event</span><span class="s3">.</span><span class="s1">key </span><span class="s3">== </span><span class="s1">pygame</span><span class="s3">.</span><span class="s1">K_RIGHT</span><span class="s3">:</span>
+                    <span class="s1">changeX </span><span class="s3">= </span><span class="s5">0</span>
+
+    <span class="s0">if not </span><span class="s1">game_over</span><span class="s3">:</span>
+        <span class="s2"># Update player position</span>
+        <span class="s1">playerX </span><span class="s3">+= </span><span class="s1">changeX</span>
+
+        <span class="s2"># Enemy movement and logic for each enemy</span>
+        <span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">range</span><span class="s3">(</span><span class="s1">no_of_enemies</span><span class="s3">):</span>
+            <span class="s1">enemyX</span><span class="s3">[</span><span class="s1">i</span><span class="s3">] += </span><span class="s1">enemy_SpeedX</span><span class="s3">[</span><span class="s1">i</span><span class="s3">]</span>
+            <span class="s0">if </span><span class="s1">enemyX</span><span class="s3">[</span><span class="s1">i</span><span class="s3">] &lt;= </span><span class="s5">0 </span><span class="s0">or </span><span class="s1">enemyX</span><span class="s3">[</span><span class="s1">i</span><span class="s3">] &gt;= </span><span class="s5">900 </span><span class="s3">- </span><span class="s1">enemy_img</span><span class="s3">[</span><span class="s1">i</span><span class="s3">].</span><span class="s1">get_width</span><span class="s3">():</span>
+                <span class="s1">enemy_SpeedX</span><span class="s3">[</span><span class="s1">i</span><span class="s3">] *= -</span><span class="s5">1</span>
+                <span class="s1">enemyY</span><span class="s3">[</span><span class="s1">i</span><span class="s3">] += </span><span class="s1">enemy_SpeedY</span><span class="s3">[</span><span class="s1">i</span><span class="s3">]</span>
+
+            <span class="s2"># Check for collision with bullet</span>
+            <span class="s0">if </span><span class="s1">is_collision</span><span class="s3">(</span><span class="s1">bulletX</span><span class="s3">, </span><span class="s1">bulletY</span><span class="s3">, </span><span class="s1">enemyX</span><span class="s3">[</span><span class="s1">i</span><span class="s3">], </span><span class="s1">enemyY</span><span class="s3">[</span><span class="s1">i</span><span class="s3">]):</span>
+                <span class="s1">bullet_state </span><span class="s3">= </span><span class="s4">&quot;ready&quot;</span>
+                <span class="s1">enemyX</span><span class="s3">[</span><span class="s1">i</span><span class="s3">] = </span><span class="s1">random</span><span class="s3">.</span><span class="s1">randint</span><span class="s3">(</span><span class="s5">0</span><span class="s3">, </span><span class="s5">900 </span><span class="s3">- </span><span class="s1">enemy_img</span><span class="s3">[</span><span class="s1">i</span><span class="s3">].</span><span class="s1">get_width</span><span class="s3">())</span>
+                <span class="s1">enemyY</span><span class="s3">[</span><span class="s1">i</span><span class="s3">] = </span><span class="s1">random</span><span class="s3">.</span><span class="s1">randint</span><span class="s3">(</span><span class="s5">30</span><span class="s3">, </span><span class="s5">150</span><span class="s3">)</span>
+                <span class="s1">score </span><span class="s3">+= </span><span class="s5">1</span>
+                <span class="s1">explosion_sound</span><span class="s3">.</span><span class="s1">play</span><span class="s3">()  </span><span class="s2"># Play explosion sound</span>
+
+            <span class="s1">enemy</span><span class="s3">(</span><span class="s1">enemyX</span><span class="s3">[</span><span class="s1">i</span><span class="s3">], </span><span class="s1">enemyY</span><span class="s3">[</span><span class="s1">i</span><span class="s3">], </span><span class="s1">i</span><span class="s3">)</span>
+
+        <span class="s2"># Bullet movement</span>
+        <span class="s0">if </span><span class="s1">bullet_state </span><span class="s3">== </span><span class="s4">&quot;fired&quot;</span><span class="s3">:</span>
+            <span class="s1">fire_bullet</span><span class="s3">(</span><span class="s1">bulletX</span><span class="s3">, </span><span class="s1">bulletY</span><span class="s3">)</span>
+            <span class="s1">bulletY </span><span class="s3">+= </span><span class="s1">bullet_speedY</span>
+        <span class="s0">if </span><span class="s1">bulletY </span><span class="s3">&lt;= </span><span class="s5">0</span><span class="s3">:</span>
+            <span class="s1">bulletY </span><span class="s3">= </span><span class="s1">playerY</span>
+            <span class="s1">bullet_state </span><span class="s3">= </span><span class="s4">&quot;ready&quot;</span>
+
+        <span class="s2"># Check for Game Over (if any enemy reaches the player)</span>
+        <span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">range</span><span class="s3">(</span><span class="s1">no_of_enemies</span><span class="s3">):</span>
+            <span class="s0">if </span><span class="s1">enemyY</span><span class="s3">[</span><span class="s1">i</span><span class="s3">] &gt; </span><span class="s1">playerY </span><span class="s3">- </span><span class="s1">enemy_img</span><span class="s3">[</span><span class="s1">i</span><span class="s3">].</span><span class="s1">get_height</span><span class="s3">():</span>
+                <span class="s1">game_over </span><span class="s3">= </span><span class="s0">True</span>
+
+        <span class="s2"># Keep the player within the screen boundaries</span>
+        <span class="s1">playerX </span><span class="s3">= </span><span class="s1">max</span><span class="s3">(</span><span class="s5">0</span><span class="s3">, </span><span class="s1">min</span><span class="s3">(</span><span class="s1">playerX</span><span class="s3">, </span><span class="s5">900 </span><span class="s3">- </span><span class="s1">player_img</span><span class="s3">.</span><span class="s1">get_width</span><span class="s3">()))</span>
+
+        <span class="s2"># Draw the player</span>
+        <span class="s1">player</span><span class="s3">(</span><span class="s1">playerX</span><span class="s3">, </span><span class="s1">playerY</span><span class="s3">)</span>
+
+    <span class="s0">else</span><span class="s3">:</span>
+        <span class="s2"># Display Game Over text</span>
+        <span class="s1">gameover_text</span><span class="s3">()</span>
+
+    <span class="s2"># Always display the score</span>
+    <span class="s1">score_text</span><span class="s3">()</span>
+
+    <span class="s2"># Update the display</span>
+    <span class="s1">pygame</span><span class="s3">.</span><span class="s1">display</span><span class="s3">.</span><span class="s1">update</span><span class="s3">()</span>
+</pre>
+</body>
+</html>
